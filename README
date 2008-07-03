@@ -6,6 +6,8 @@ This version came from http://ducktyped.com/2007/6/12/how-to-change-databases-us
 
 = Changes
 
+* Be nicer on RAM and the DB.  Don't fetch all records at once.  If the table has an id field, fetch 1000 at a time.  If not, fall back to just fetching all of the (for m2m xref tables).
+
 * Removed dependency on Dr. Nic's Magic Models
 
 = Credits

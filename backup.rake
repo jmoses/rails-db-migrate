@@ -13,9 +13,15 @@ namespace :db do
         ['schema_info', 'sessions', 'logged_exceptions'].include?(tbl)
       end
     end
+    
+    def change_yaml( str )
+      str.gsub(/^--- \n/, '')
+    end
   
     desc "Dump entire db."
     task :write => :environment do 
+      require 'enumerator'
+
 
       dir = RAILS_ROOT + '/db/backup'
       FileUtils.mkdir_p(dir)
@@ -29,7 +35,17 @@ namespace :db do
 
         klass = tbl.classify.constantize
         puts "Writing #{tbl}..."
-        File.open("#{tbl}.yml", 'w+') { |f| YAML.dump klass.find(:all).collect {|a| a.attributes }, f }      
+
+        File.open("#{tbl}.yml", 'w+') do |f|
+          if klass.column_names.include?("id")
+            ids = ActiveRecord::Base.connection.select_values("select id from #{tbl}")
+            ids.each_slice(1000) do |slice_of_ids|
+              f << change_yaml(klass.find(:all, :conditions => ["id in (?)", slice_of_ids]).collect {|m| m.attributes }.to_yaml)
+            end
+          else
+            YAML.dump klass.find(:all).collect {|a| a.attributes }, f
+          end
+        end
       end
     
     end
