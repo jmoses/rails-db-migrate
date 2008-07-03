@@ -21,7 +21,7 @@ namespace :db do
     desc "Dump entire db."
     task :write => :environment do 
       require 'enumerator'
-
+      STDOUT.sync = true
 
       dir = RAILS_ROOT + '/db/backup'
       FileUtils.mkdir_p(dir)
@@ -35,19 +35,25 @@ namespace :db do
 
         klass = tbl.classify.constantize
         puts "Writing #{tbl}..."
-
+        
         File.open("#{tbl}.yml", 'w+') do |f|
           if klass.column_names.include?("id")
             ids = ActiveRecord::Base.connection.select_values("select id from #{tbl}")
+            next if ids.size == 0
+            ct = 0
             ids.each_slice(1000) do |slice_of_ids|
+              ct += 1
               f << change_yaml(klass.find(:all, :conditions => ["id in (?)", slice_of_ids]).collect {|m| m.attributes }.to_yaml)
+              STDOUT.write("\r wrote #{ct*1000} records...")
             end
+            puts
           else
             YAML.dump klass.find(:all).collect {|a| a.attributes }, f
           end
         end
       end
     
+      STDOUT.sync = false
     end
 
     task :read => [:environment, 'db:schema:load'] do 
