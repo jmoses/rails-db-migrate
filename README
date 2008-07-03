@@ -1,1 +1,14 @@
-Script to create/load YAML files
+= rails-db-migrate
+
+This is just a set of rake tasks to migrate (or backup and restore) a DB vai YAML files.
+
+This version came from http://ducktyped.com/2007/6/12/how-to-change-databases-using-ruby-on-rails initially.
+
+= Changes
+
+* Removed dependency on Dr. Nic's Magic Models
+
+= Credits
+
+Initial version: http://blog.leetsoft.com/2006/5/29/easy-migration-between-databases
+set_sequences added: http://ducktyped.com/2007/6/12/how-to-change-databases-using-ruby-on-rails
